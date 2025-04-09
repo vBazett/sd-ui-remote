@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Stable Diffusion Remote</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0d1117;
+      color: #c9d1d9;
+      margin: 0;
+      padding: 40px;
+      display: flex;
+      flex-direction: row;
+      gap: 40px;
+    }
+    .sidebar {
+      width: 340px;
+      background-color: #161b22;
+      padding: 25px;
+      border-radius: 12px;
+    }
+    input, textarea, select {
+      width: 100%;
+      margin-top: 5px;
+      padding: 10px;
+      border-radius: 6px;
+      background: #0d1117;
+      color: #c9d1d9;
+      border: 1px solid #30363d;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background-color: #238636;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .preview {
+      flex: 1;
+      background-color: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 512px;
+    }
+    .spinner {
+      border: 8px solid #30363d;
+      border-top: 8px solid #58a6ff;
+      border-radius: 50%;
+      width: 64px;
+      height: 64px;
+      animation: spin 1s linear infinite;
+      margin: auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <form id="genForm">
+      <h2>Remote Image Generator</h2>
+
+      <label for="modelo">Model</label>
+      <input type="text" name="modelo" value="sd_xl_base_1.0">
+
+      <label for="prompt">Prompt</label>
+      <textarea name="prompt" rows="3"></textarea>
+
+      <label for="negative">Negative Prompt</label>
+      <textarea name="negative" rows="2"></textarea>
+
+      <label for="steps">Steps</label>
+      <input type="number" name="steps" value="30">
+
+      <label for="cfg">CFG Scale</label>
+      <input type="number" step="0.5" name="cfg" value="7">
+
+      <label for="seed">Seed</label>
+      <input type="text" name="seed" value="">
+
+      <label for="sampler">Sampler</label>
+      <input type="text" name="sampler" value="Euler a">
+
+      <label for="width">Width</label>
+      <input type="number" name="width" value="832">
+
+      <label for="height">Height</label>
+      <input type="number" name="height" value="1216">
+
+      <button type="submit">Generate</button>
+    </form>
+  </div>
+  <div class="preview" id="preview">
+    <p>Waiting for image...</p>
+  </div>
+
+  <script>
+    document.getElementById('genForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const preview = document.getElementById('preview');
+      preview.innerHTML = '<div class="spinner"></div><p style="text-align:center">Generating image...</p>';
+
+      const payload = {
+        prompt: formData.get("prompt"),
+        negative_prompt: formData.get("negative"),
+        steps: parseInt(formData.get("steps")),
+        cfg_scale: parseFloat(formData.get("cfg")),
+        sampler_name: formData.get("sampler"),
+        seed: formData.get("seed") === "" ? -1 : parseInt(formData.get("seed")),
+        width: parseInt(formData.get("width")),
+        height: parseInt(formData.get("height")),
+        override_settings: {
+          sd_model_checkpoint: formData.get("modelo")
+        }
+      };
+
+      const response = await fetch("http://187.123.456.78:7860/sdapi/v1/txt2img", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+      const imageData = result.images[0];
+      const img = new Image();
+      img.src = "data:image/png;base64," + imageData;
+      img.style.maxWidth = "100%";
+      preview.innerHTML = "";
+      preview.appendChild(img);
+    });
+  </script>
+</body>
+</html>
