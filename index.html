@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Stable Diffusion Remote</title>
+  <title>Stable Diffusion - Generator</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       background-color: #0d1117;
       color: #c9d1d9;
       margin: 0;
@@ -20,25 +20,36 @@
       padding: 25px;
       border-radius: 12px;
     }
+    label {
+      margin-top: 12px;
+      font-weight: bold;
+      display: block;
+      color: #58a6ff;
+    }
     input, textarea, select {
       width: 100%;
-      margin-top: 5px;
       padding: 10px;
+      margin-top: 5px;
       border-radius: 6px;
       background: #0d1117;
       color: #c9d1d9;
       border: 1px solid #30363d;
+      font-size: 14px;
     }
     button {
       margin-top: 20px;
       width: 100%;
       padding: 12px;
       background-color: #238636;
-      color: white;
-      font-weight: bold;
       border: none;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
       border-radius: 8px;
       cursor: pointer;
+    }
+    button:hover {
+      background-color: #2ea043;
     }
     .preview {
       flex: 1;
@@ -51,34 +62,92 @@
       justify-content: center;
       min-height: 512px;
     }
-    .spinner {
-      border: 8px solid #30363d;
-      border-top: 8px solid #58a6ff;
-      border-radius: 50%;
-      width: 64px;
-      height: 64px;
-      animation: spin 1s linear infinite;
-      margin: auto;
+    img {
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 10px;
     }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
+  
+.spinner {
+  border: 8px solid #30363d;
+  border-top: 8px solid #58a6ff;
+  border-radius: 50%;
+  width: 64px;
+  height: 64px;
+  animation: spin 1s linear infinite;
+  margin: auto;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+</style>
 </head>
 <body>
   <div class="sidebar">
     <form id="genForm">
-      <h2>Remote Image Generator</h2>
+      <h2>Stable Diffusion Generator</h2>
 
       <label for="modelo">Model</label>
-      <input type="text" name="modelo" value="sd_xl_base_1.0">
+      <select name="modelo" id="modelo">
+        <option value="autismmixSDXL_autismmixConfetti">autismmixSDXL_autismmixConfetti</option>
+<option value="hassakuXLIllustrious_v21fix">hassakuXLIllustrious_v21fix</option>
+<option value="hassakuXLPony_v13">hassakuXLPony_v13</option>
+<option value="illustriousXL_v01">illustriousXL_v01</option>
+<option value="malaAnimeMixNSFW_v60">malaAnimeMixNSFW_v60</option>
+<option value="mistoonAnime_v10Noobai">mistoonAnime_v10Noobai</option>
+<option value="mistoonCube_v10">mistoonCube_v10</option>
+<option value="noobaiXLNAIXL_epsilonPred05Version">noobaiXLNAIXL_epsilonPred05Version</option>
+<option value="novaFurryXL_illustriousV50">novaFurryXL_illustriousV50</option>
+<option value="ntrMIXIllustriousXL_xiii">ntrMIXIllustriousXL_xiii</option>
+<option value="ponyDiffusionV6XL_v6StartWithThisOne">ponyDiffusionV6XL_v6StartWithThisOne</option>
+<option value="pov_blowjob_v1.1">pov_blowjob_v1.1</option>
+<option value="prefectPonyXL_v50">prefectPonyXL_v50</option>
+<option value="sd_xl_base_1.0">sd_xl_base_1.0</option>
+<option value="sdxl_vae">sdxl_vae</option>
+<option value="shiFootDesk">shiFootDesk</option>
+<option value="v1-5-pruned-emaonly">v1-5-pruned-emaonly</option>
+<option value="waiNSFWIllustrious_v110">waiNSFWIllustrious_v110</option>
+<option value="waiNSFWIllustrious_v120">waiNSFWIllustrious_v120</option>
+      </select>
 
       <label for="prompt">Prompt</label>
       <textarea name="prompt" rows="3"></textarea>
 
-      <label for="negative">Negative Prompt</label>
+      <input type="hidden" name="negative_base" value="blurry,blurry_image,lowres,low_resolution,low_picture_quality,low_picture_anime,extra_anatomy,extra_body,extra_navel,extra_face,extra_eyes,extra_chest,extra_nipples,extra_hips,extra_arms,extra_hands,extra_fingers,extra_legs,extra_feet,extra_toe,missing_anatomy,missing_body,missing_navel,missing_face,missing_eyes,missing_chest,missing_nipples,missing_hips,missing_arms,missing_hands,missing_fingers,missing_legs,missing_feet,missing_toe,sketch,sketching,(worst_quality:2),(low_quality:2),((monochrome)),((grayscale)),inpainting,hdr,bad_prompt_version2,jpeg_artifacts,signature,watermark,text,error,missing_fingers">
+
+<label for="pose">Pose</label>
+<select id="pose" name="pose" onchange="updatePosePrompt()">
+  <option value="">None</option>
+  <option value="<lora:feet_anime_il_v3:1>">Legs extended</option>
+</select>
+<input type="hidden" name="pose_prompt" id="pose_prompt" value="">
+
+<label for="negative">Negative Prompt</label>
       <textarea name="negative" rows="2"></textarea>
+
+      <label for="sampler">Sampler</label>
+      <select name="sampler">
+        <option value="Euler a">Euler a</option>
+<option value="Euler">Euler</option>
+<option value="LMS">LMS</option>
+<option value="Heun">Heun</option>
+<option value="DPM2">DPM2</option>
+<option value="DPM2 a">DPM2 a</option>
+<option value="DPM++ 2M">DPM++ 2M</option>
+<option value="DPM++ 2M Karras">DPM++ 2M Karras</option>
+<option value="DPM++ 2S a">DPM++ 2S a</option>
+<option value="DPM++ SDE">DPM++ SDE</option>
+<option value="DPM++ SDE Karras">DPM++ SDE Karras</option>
+<option value="DPM fast">DPM fast</option>
+<option value="DPM adaptive">DPM adaptive</option>
+<option value="DDIM">DDIM</option>
+<option value="PLMS">PLMS</option>
+<option value="UniPC">UniPC</option>
+<option value="Restart">Restart</option>
+<option value="LCM">LCM</option>
+      </select>
 
       <label for="steps">Steps</label>
       <input type="number" name="steps" value="30">
@@ -87,10 +156,7 @@
       <input type="number" step="0.5" name="cfg" value="7">
 
       <label for="seed">Seed</label>
-      <input type="text" name="seed" value="">
-
-      <label for="sampler">Sampler</label>
-      <input type="text" name="sampler" value="Euler a">
+      <input type="text" name="seed">
 
       <label for="width">Width</label>
       <input type="number" name="width" value="832">
@@ -101,6 +167,7 @@
       <button type="submit">Generate</button>
     </form>
   </div>
+
   <div class="preview" id="preview">
     <p>Waiting for image...</p>
   </div>
@@ -109,39 +176,29 @@
     document.getElementById('genForm').addEventListener('submit', async function (e) {
       e.preventDefault();
       const formData = new FormData(this);
+const poseAdd = formData.get('pose_prompt') || '';
+const basePrompt = formData.get('prompt') || '';
+formData.set('prompt', basePrompt + (poseAdd ? ' ' + poseAdd : ''));
+const baseNeg = formData.get('negative_base') || '';
+const userNeg = formData.get('negative') || '';
+formData.set('negative', baseNeg + (userNeg ? ', ' + userNeg : ''));
       const preview = document.getElementById('preview');
-      preview.innerHTML = '<div class="spinner"></div><p style="text-align:center">Generating image...</p>';
+      preview.innerHTML = '<div class="spinner"></div><p style="text-align:center;margin-top:12px;">Generating image...</p>';
 
-      const payload = {
-        prompt: formData.get("prompt"),
-        negative_prompt: formData.get("negative"),
-        steps: parseInt(formData.get("steps")),
-        cfg_scale: parseFloat(formData.get("cfg")),
-        sampler_name: formData.get("sampler"),
-        seed: formData.get("seed") === "" ? -1 : parseInt(formData.get("seed")),
-        width: parseInt(formData.get("width")),
-        height: parseInt(formData.get("height")),
-        override_settings: {
-          sd_model_checkpoint: formData.get("modelo")
-        }
-      };
-
-      const response = await fetch("http://187.123.456.78:7860/sdapi/v1/txt2img", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
+      const res = await fetch('/generate', {
+        method: 'POST',
+        body: new URLSearchParams(formData)
       });
-
-      const result = await response.json();
-      const imageData = result.images[0];
-      const img = new Image();
-      img.src = "data:image/png;base64," + imageData;
-      img.style.maxWidth = "100%";
-      preview.innerHTML = "";
-      preview.appendChild(img);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      preview.innerHTML = `<img src="${url}" alt="Generated Image">`;
     });
-  </script>
+  
+function updatePosePrompt() {
+  const posePrompt = document.getElementById("pose").value;
+  document.getElementById("pose_prompt").value = posePrompt;
+}
+
+</script>
 </body>
 </html>
